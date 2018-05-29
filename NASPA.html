@@ -1,0 +1,215 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title> </title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<!--[if lte IE 8]><script src="css/ie/html5shiv.js"></script><![endif]-->
+		<script src="js/jquery.min.js"></script>
+		<script src="js/jquery.dropotron.min.js"></script>
+		<script src="js/jquery.scrollgress.min.js"></script>
+		<script src="js/jquery.scrolly.min.js"></script>
+		<script src="js/jquery.slidertron.min.js"></script>
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-layers.min.js"></script>
+		<script src="js/init.js"></script>
+		<noscript>
+			<link rel="stylesheet" href="css/skel.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-xlarge.css" />
+		</noscript>
+		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie/v9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie/v8.css" /><![endif]-->
+	</head>
+	<body class="landing">
+
+		<!-- Header -->
+			<header id="header" class="alt skel-layers-fixed">
+				<h1><a href="index.html">HTML5 Website <span>by Html5webtemplates.co.uk</span></a></h1>
+			</header>
+
+		<!-- Banner -->
+			<section id="banner">
+				<div class="inner">
+					<h2>Allen Pengelly</h2>
+					<p>Scrabble Handicap by Rating Difference</p>
+				</div>
+			</section>
+			
+		<!-- One -->
+			<section id="one" class="wrapper style1">
+				<div class="container">
+					<header class="major">
+						<p>As one of my hobbies I am a participant in NASPA<br />
+						(North American Scrabble Players Association)<br />
+						tournaments. One of the questions that I had posed to me<br />
+						before is whether there is a way to fairly handicap the<br />
+						difference in scores between two players given their NASPA ratings<br />
+						this page is designed to show the analysis that I put into the problem.<br />
+						<br />
+						Special thanks to Seth Lipkin and Keith Smith for their excellent<br />
+						website www.cross-tables.com, and the associated REST API where I was<br />
+						able to download all of the data needed to perform the analysis.</p>
+					</header>
+					<header class = "major">
+					<p>To start the analysis I downloaded the results of all tournament<br />
+					Scrabble games from the start of 2013. I then further culled the<br />
+					data to only include games using the North American Word List (OCTWL)<br />
+					(there are also tournament games using the international word listing (CSW)<br />
+					but I wanted to compare apples to apples), and games where both players had<br />
+					a recorded score, and an established rating (newcomers had a rating of 0 in<br />
+					the database).<br /></p>
+					
+					<p>Once I had the underlying data of 216,294 scrabble games I then transformed<br />
+					the data to make it into an observation for each player in the game.  This<br />
+					doubled the number of records, but also "mirrored" the data since if one<br />
+					player is rated 100 points above the other one, and wins by 30 points then<br />
+					there should also be a record where a player is rated 100 points below the<br />
+					other one, and loses by 30 points. When the players have the same rating<br />
+					then the expected difference in score should be estimated as zero, due to the<br />
+					two records canceling each other out statistically.</p>
+					<br />
+					<p> As a starting point we can check some assumptions. The difference in score<br />
+					should be normally distributed around 0.</p>
+					
+					<img src = "Score Difference Hist.png">
+                    
+					<p></p>
+					<p>The difference in rating should also be normally distributed around 0.</p>
+					
+					<img src = "Rating Difference Hist.png">
+					
+					<p></p>
+					<p>So far so good. Now we can look at a scatter plot of all of the points</p>
+					
+					<img src = "Initial Scatter Plot.png">
+					
+					<p></p>
+					<p>Woah!  It looks like there is a pattern here, but there are a lot of points<br />
+					overlapping each other. We can try a different size of marker to see if that<br />
+					makes things any clearer.</p>
+					
+					<img src = "Second Scatter Plot.png">
+					
+					<p></p>
+					<p>Although that makes the outlying points a little bit clearer, but there still<br />
+					seems to be a big blob in the middle. Another technique that is often used is to<br />
+					use as a marker a hollow circle. That way you can still see some of the overlap<br />
+					in the markers.</p>
+					
+					<img src = "Third Scatter Plot.png">
+					
+					<p></p>
+					<p>Still clear as mud.  It looks like we have to take another tack to show the<br />
+					pattern in the data. What if I told you there is a chart type in Python (through Seaborn)<br />
+					that incorporates all of the charts that we have calculated so far, and allows us to see<br />
+					values for overlapping points?  Enter the jointplot!</p>
+					
+					<img src = "Score Rating hex 1.png">
+					
+					<p></p>
+					<p>Using the jointplot, we can show (through the bar charts on the outside of the graph)<br />
+					that the data is normally distributed for both variables. The shade of the "hexes" on<br />
+					the inside of the graph shows the concentration of values that lie within the hex.<br />
+					The darker the hex, the more values that lie within in. Closely related to this<br />
+					hex jointplot is the kde (kernel density estimation) graph:</p>
+					
+					<img src = "Score Rating kde.png">
+					
+					<p></p>
+					<p>The kde graph may be familiar to those of you that have seen topographical maps<br />
+					before.  The darker the shading the greater the number of records within the circle.<br />
+					<br />
+					Both of the above graphs seem to still show a positive correlation between difference<br />
+					in score and difference in rating.  We can now do a linear regression on the data to<br />
+					obtain a formula.<br />
+					<br />
+					When we run the linear regression, we obtain a formula of:<br />
+					<br />
+					Expected Score Difference = Rating Difference * 0.14366<br />
+					<br />
+					(There is no intercept since, as was stated before, the data is mirrored, so the<br />
+					line of best fit should go through the point (0,0)).<br />
+					<br />
+					We can also obtain the R2 value for the data.  For a perfect model the R2 value<br />
+					would be 1.  The R2 value for this data is 0.117585.  That is not very good.<br />
+					To find the reason for this, we only need to look at the variance in the values.<br />
+					<br />
+					The mean squared error from the linear regression line for the records is 8782.983<br />
+					Taking the square root of this number gives us the standard deviation: 93.718 points!<br />
+					Using normally distributed values, 68% of values should lie within 1 standard<br />
+					deviation, and 95% of values should lie within 1.96 standard deviations. That means<br />
+					the range for 95% confidence is our Expected Score Difference +/- 183.69 points.<br />
+					That is a huge range!  No wonder why the R2 value is so poor!</p>
+					
+					<p>One area to look at for a better model is the fact that difference in rating is<br />
+					not a linear relationship to what percentage of games are supposed to be won, but<br />
+					rather a logorithmic relationship.  For those of you that follow ratings, it is<br />
+					very close to the Elo model.  The formula for the expected win percentage is:</p>
+					
+					<p>E Win % = 1 / (1 + e ^ (-0.0031879 * Rating Difference))</p>
+					
+					<p>We can map this relationship using a jointplot, and compare the statistics:</p>
+					
+					<img src = "Score WinPerc hex.png">
+					
+					<p></p>
+					<p>Hmm, there seems to be more variation in this plot.  If we check the<br />
+					R2 for this transformed data, it is marginally worse than for the other<br />
+					plot, and the standard deviation is also marginally higher - meaning that<br />
+					this model is worse than our original model!</p>
+					
+					<p>Another item to check is whether we could transform the difference in rating<br />
+					by squaring it or cubing it to create a better model.  If so then there should be<br />
+					a relationship between our residual values and the difference in rating. Once<br />
+					again we can start out with a scatter plot:</p>
+					
+					<img src = "Residual Scatter Plot.png">
+					
+					<p></p>
+					<p>Back to a big blob again.  Let's put the residuals into a jointplot:</p>
+					
+					<img src = "Residual Values hex.png">
+					<p></p>
+					<img src = "Residual Values kde.png">
+					
+					<p></p>
+					<p>Looking at the bar graph on the right hand side, we can see that the<br />
+					residuals are normally distributed (as they should be if the data does<br />
+					not need another variable to explain it).  The "p" score in the graph<br />
+					is 1 which means that there is no relationship between the difference<br />
+					in rating and the residual values - which we would expect if we wanted<br />
+					to add a variable raising the difference in rating to a higher power<br />
+					that one.</p>
+					
+					<p>Conclusion:  If an handicap is needed then the formula of 0.14366<br />
+					times the difference in rating is as good as any, but it should not<br />
+					be used for anything serious due to the large amount of variance in<br />
+					the data.</p>
+					
+					
+					</header>
+				</div>
+			</section>	
+			
+		<!-- CTA -->
+			<section id="cta" class="wrapper style3">
+				<h2>If interested, please view my resume</h2>
+				<ul class="actions">
+					<li><a href="resume.pdf" class="button big">Get Started</a></li>
+				</ul>
+			</section>
+			
+		<!-- Footer -->
+			<footer id="footer">
+				<span class="copyright">
+					Template Design by <a href="http://www.html5webtemplates.co.uk">Response Web Templates</a>
+                    <p>
+					Content by Allen Pengelly <a href="mailto:apengelly@golden.net">Contact Allen</a>
+				</span>
+			</footer>
+
+	</body>
+</html>
