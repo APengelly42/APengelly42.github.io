@@ -1,0 +1,270 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title> </title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<!--[if lte IE 8]><script src="css/ie/html5shiv.js"></script><![endif]-->
+		<script src="js/jquery.min.js"></script>
+		<script src="js/jquery.dropotron.min.js"></script>
+		<script src="js/jquery.scrollgress.min.js"></script>
+		<script src="js/jquery.scrolly.min.js"></script>
+		<script src="js/jquery.slidertron.min.js"></script>
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-layers.min.js"></script>
+		<script src="js/init.js"></script>
+		<noscript>
+			<link rel="stylesheet" href="css/skel.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-xlarge.css" />
+		</noscript>
+		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie/v9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie/v8.css" /><![endif]-->
+	</head>
+	<body class="landing">
+
+		<!-- Header -->
+			<header id="header" class="alt skel-layers-fixed">
+				<h1><a href="index.html">HTML5 Website <span>by Html5webtemplates.co.uk</span></a></h1>
+			</header>
+
+		<!-- Banner -->
+			<section id="banner">
+				<div class="inner">
+					<h2>Allen Pengelly</h2>
+					<p>Programming Sample 2</p>
+					<p>Building a GADDAG</p>
+				</div>
+			</section>
+			
+		<!-- One -->
+			<section id="one" class="wrapper style1">
+				<div class="container">
+					<header class="major">
+                        <p>To build a future program that evaluates Scrabble positions and<br />
+						evaluates all future moves, I needed to build a GADDAG.  If you wish<br />
+						to know the full definition of a GADDAG there is a Wikipedia article<br />
+						on it, that I would encourage you to read.</p>
+						
+						<p>The purpose of a GADDAG is to be able to build a Scrabble word<br />
+						out from any point in the word.  If the word "AN" was on the board<br />
+						a GADDAG can be traversed to find the 15,904 occurences of "AN" in<br />
+						the Scrabble dictionary in approximately 0.055 seconds!  This includes<br />
+						the 337 words where "AN" shows up twice in the word and the word<br />
+						where "AN" shows up 3 times - MANGANESIAN</p>
+						
+						<p>A GADDAG is built as a trie, but instead of moving just forward<br />
+						through a word, at any point in the trie it has a link to flip a<br />
+						switch and start adding letters to the front of a string.  This<br />
+						ability to move forwards and backwards speeds up word finding<br />
+						significantly, but comes with the penalty of making the trie<br />
+						very large, due to every initial word having to be represented<br />
+						by n strings where n is the length of the word.</p>
+						
+						<p>For example, the word ANISOLE would have to be represented as<br />
+						the following strings: ($ represents the "flipping point" where<br />
+						it starts adding to the front)</p>
+						
+						<p>ANISOLE<br />
+						NISOLE$A<br />
+						ISOLE$NA<br />
+						SOLE$INA<br />
+						OLE$SINA<br />
+						LE$OSINA<br />
+						E$LOSINA</p>
+						
+						<p>The "cost" to building the trie this way is an increase in size.<br />
+						A GADDAG is almost 5 times the size of a DAWG (Directed Acyclic Word Graph)<br />
+						used by earlier versions of Scrabble playing programs.</p>
+						
+						<p>When first building the trie for the Scrabble dictionary, I built nodes<br />
+						with a boolean indicator for whether that point in the trie was the end of<br />
+						a word, and then a dictionary of where any branches led from that node.<br />
+						On the first run through building the trie 5,430,677 nodes are created but<br />
+						there is a lot of duplication at the end paths of the words.  If we can<br />
+						find the common end points, then we can consolidate them into one node.<br />
+						When looking at the trie after the initial creation there are 1,408,976<br />
+						nodes that could be removed by consolidating common endings (most of them<br />
+						being words that only take an "S" as an additional letter on the end of<br />
+						the word).</p>
+						
+						<p>Once the layer of end nodes have been consolidated, we can then check for<br />
+						common patterns at the next level.  This continues until we cannot find<br />
+						any duplication in the node paths.  For the current Scrabble dictionary<br />
+						we can consolidate 14 times, ending with a trie with 434,828 nodes<br />
+						representing all 188,738 words in the Scrabble dictionary.</p>
+						
+						<p>At the end of the program I "pickle" the nodes (Python's way of binary<br />
+						encoding for classes) so that it can be loaded into other programs.  Making<br />
+						a trie with pointers to other nodes is very fast.  Over the entire dictionary<br />
+						an average of 308,500 words can be found every second. When there are any<br />
+						constraints on the word then it works even faster</p>
+						
+						<p>Code to build the GADDAG can be found below:</p>
+					</header>
+		
+					<p>.........</p>
+					<p>
+import pickle<br />
+<br />
+class JustDictTree:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    def __init__(self, links):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        self.links = links<br />
+<br />
+class Node:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    def __init__(self, endFlag, nodeNo):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        self.endFlag = endFlag<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        self.linkStr = ""<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        self.nodeNo = nodeNo<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    def __lt__(self,other):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        if self.endFlag > other.endFlag:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            return False<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        elif self.endFlag < other.endFlag:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            return True<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        else:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            if self.linkStr > other.linkStr:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                return False<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            elif self.linkStr < other.linkStr:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                return True<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            else:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                if self.nodeNo > other.nodeNo:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    return False<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                else:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    return True   <br />             
+<br />
+class LinkList:<br />
+&nbsp;&nbsp;&nbsp;    def __init__(self,letter,nodeNo):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      self.letter = letter<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        self.nodeNo = nodeNo<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    def __gt__(self,other):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        if self.letter > other.letter:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            return True<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        else:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            return False<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    def __lt__(self,other):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        if self.letter < other.letter:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            return True<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        else:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            return False<br />
+<br />
+words = []<br />
+wordbuild = []<br />
+tree = [[False,{},0]]<br />
+lastnode = 0<br />
+<br />
+input = open(r"C:\Users\Apeng\OneDrive\Documents\OWLList.txt","r")<br />
+for line in input:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    words.append(line.strip())<br />
+input.close()<br />
+<br />
+for word in words:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    wordbuild.append(word)<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    for i in range(1,len(word)):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        firstpart = word[:i]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        firstpart = firstpart[::-1]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        lastpart = word[i:]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        currword = lastpart + "^" + firstpart<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        wordbuild.append(currword)<br />
+<br />
+for word in wordbuild:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    currnode = 0<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    for i, char in enumerate(word):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        currdict = tree[currnode][1]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        if char not in currdict.keys():<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            lastnode += 1<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            tree.append([False, {}, lastnode])<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            currdict[char] = lastnode<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            currnode = lastnode<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        else:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            currnode = currdict[char]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        if i == len(word) - 1:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            tree[currnode][0] = True<br />
+<br />
+movedFlag = True<br />
+<br />
+while movedFlag:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    movedFlag = False<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    goodNodes = []<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    badNodes = {}<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    nodeMoves = {}<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    goodNodeCount = 0<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    newtree = []<br />
+    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    print(len(tree))  <br />   
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    for i in range(len(tree)):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        newtree.append(Node(tree[i][0],tree[i][2]))<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        links = []<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        for k in tree[i][1].keys():<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            links.append(LinkList(k,tree[i][1][k]))<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        links = sorted(links)<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        for k in links:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            newtree[-1].linkStr += k.letter + str(k.nodeNo)<br />
+    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    newtree = sorted(newtree)<br />
+    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    oldFlag = True<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    oldStr = ""<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    oldNode = 0<br />
+    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    for node in newtree:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        if (node.endFlag == oldFlag and node.linkStr == oldStr):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            badNodes[node.nodeNo] = oldNode<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        else:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            goodNodes.append(node.nodeNo)<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            oldFlag = node.endFlag<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            oldStr = node.linkStr<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            oldNode = node.nodeNo<br />
+            <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    goodNodes = sorted(goodNodes)<br />
+            <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    if len(badNodes) > 0:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        movedFlag = True<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        currTree = []        <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        for i, leaf in enumerate(goodNodes):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            currTree.append(tree[leaf])<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            nodeMoves[leaf]=i<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            currTree[-1][2] = i<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        for i, node in enumerate(currTree):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            for link in node[1].keys():<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                if node[1][link] in nodeMoves.keys():<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    node[1][link] = nodeMoves[node[1][link]]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                else:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    node[1][link] = nodeMoves[badNodes[node[1][link]]]<br />
+                <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    tree = currTree<br />
+<br />
+endtree = []<br />
+<br />
+output = open(r"C:\Users\Apeng\OneDrive\Documents\TreePickle.txt","wb")    <br />
+<br />
+for i in range(len(tree)):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    endtree.append([tree[i][0],tree[i][1]])<br />
+    <br />
+pickle.dump(endtree,output)<br />
+output.close()<br />
+					</p>
+				</div>
+			</section>	
+			
+		<!-- CTA -->
+			<section id="cta" class="wrapper style3">
+				<h2>If interested, please view my resume</h2>
+				<ul class="actions">
+					<li><a href="Resume.pdf" class="button big">Get Started</a></li>
+				</ul>
+			</section>
+			
+		<!-- Footer -->
+			<footer id="footer">
+				<span class="copyright">
+					Template Design by <a href="http://www.html5webtemplates.co.uk">Response Web Templates</a>
+                    <p>
+					Content by Allen Pengelly <a href="mailto:apengelly@golden.net">Contact Allen</a>
+				</span>
+			</footer>
+
+	</body>
+</html>
