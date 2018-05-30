@@ -1,0 +1,284 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title> </title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<!--[if lte IE 8]><script src="css/ie/html5shiv.js"></script><![endif]-->
+		<script src="js/jquery.min.js"></script>
+		<script src="js/jquery.dropotron.min.js"></script>
+		<script src="js/jquery.scrollgress.min.js"></script>
+		<script src="js/jquery.scrolly.min.js"></script>
+		<script src="js/jquery.slidertron.min.js"></script>
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-layers.min.js"></script>
+		<script src="js/init.js"></script>
+		<noscript>
+			<link rel="stylesheet" href="css/skel.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-xlarge.css" />
+		</noscript>
+		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie/v9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie/v8.css" /><![endif]-->
+	</head>
+	<body class="landing">
+
+		<!-- Header -->
+			<header id="header" class="alt skel-layers-fixed">
+				<h1><a href="index.html">HTML5 Website <span>by Html5webtemplates.co.uk</span></a></h1>
+			</header>
+
+		<!-- Banner -->
+			<section id="banner">
+				<div class="inner">
+					<h2>Allen Pengelly</h2>
+					<p>Programming Sample 1</p>
+					<p>Overlapping 7 letter words</p>
+				</div>
+			</section>
+			
+		<!-- One -->
+			<section id="one" class="wrapper style1">
+				<div class="container">
+					<header class="major">
+                        <p>A friend from my Scrabble club contacted me the other day. He was looking<br />
+						for a way to find if there was any way of overlapping 5 words of length 7 so<br />
+						that they can be played one at a time, below the previous word.  His program<br />
+						had been running for 3 hours, and still had not completed.  He was wondering<br />
+						if there were any ways to build some efficiencies into the code.</p>
+						
+						<p>When I asked how he was building the comparisons, I found out that he was<br />
+						using nested loops, where if the newest word was placed at the bottom, then<br />
+						all of the positions were checked vertically to make sure each one was an<br />
+						acceptable word</p>
+						
+						<p>My first thought was that to build our words of 2 to 5 letters that we<br />
+						wanted to check, we do not want to use all of words.  We only want to use the<br />
+						5 letter words that are "buildable" (ie. the first 2 letters, first 3 letters, and<br />
+						first 4 letters are acceptable words in their own right).  By culling the 5 letter<br />
+						words to this "buildable" category we reduced the number of 5 letter words used from<br />
+						9,403 to 1,264!</p>
+						
+						<p>At the same time we only want to check against the 2 letter, 3 letter, and<br />
+						4 letter words that start one of these "buildable" 5 letter words, since if<br />
+						an overlapping set of size less than 5 has no future of developing into a 5<br />
+						word overlap if they are not built from one of these shorter words.</p>
+						
+						<p>To also speed the lookup process, I created a dictionary of each acceptable<br />
+						string of the shorter words, and what letters can build another acceptable word.<br />
+						Instead of trying every word we can use Python's list comprehensions to filter<br />
+						for all words that "fit" under the current set - checking starting at position 0<br />
+						and proceeding to the end - stopping if no words meet the conditions given.</p>
+						
+						<p>(By this time my friend contacted me - the program found an answer at around 3 1/2 hours!)</p>
+						
+						<p>I put my prototype code together.  To make sure it was running with a good amount<br />
+						of speed I put a "stopwatch" routine into the program.  I used one from someone who<br />
+						kindly provided some code on stackoverflow.com.  Watching the code run I came to find<br />
+						that the code was not trustworthy - it only showed 24 minutes in an hour!</p>
+						
+						<p>Once I put all the code together it seemed to have found some efficiency:</p>
+						
+						<p>Program Completed!!!<br />
+						2 answers found<br />
+						PATAMAR-AMARONE-CURETTE-ESTATED-DESEEDS<br />
+						PATAMAR-AMARONE-CURETTE-ESTATED-RESEEDS<br />
+						0 Hours, 7 Minutes, 2 Seconds</p>
+						
+						<p>So, by taking the overhead time of making the dictionary at the beginning of the<br />
+						program (about 1 minute), the overall code was 30 times quicker in finding the solutions!</p>
+						
+						<p>The Python version of my code is listed below.  If anyone is interested in my C#<br />
+						version of the same code (which I wrote to show my concepts to my friend, who primarily<br />
+						programs in C# at his job) please feel free to contact me at apengelly@golden.net</p>
+						
+					</header>
+					
+					<body>
+					<p>---PYTHON CODE LISTED BELOW---<br />
+					<br />
+					import time<br />
+                    <br />          
+					def stopWatch(value):<br />
+                    <br />
+					&nbsp;&nbsp;&nbsp;&nbsp;'''This subroutine changes the time in seconds to a nice display value'''<br />
+					<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;valueD = (((value/24)/60)/60)<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;Days = int (valueD)<br />
+					<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;valueH = (valueD - Days)*24<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;Hours = int(valueH)<br />
+					<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;valueM = (valueH - Hours)*60<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;Minutes = int(valueM)<br />
+					<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;valueS = (valueM - Minutes)*60<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;Seconds = int(valueS)<br />
+					<br />
+					&nbsp;&nbsp;&nbsp;&nbsp;print("{} Hours, {} Minutes, {} Seconds".format(Hours, Minutes, Seconds))<br />
+					<br />
+					<br />
+def buildWord(matrix, dispstr):<br />
+    <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;'''This subroutine is recursive.  Instead of iterating over all sevens,<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;   it uses the lookup dictionary created in the main program (five_tree)<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;   to filter all sevens by the possible letters that could be next to<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;   form the five letter words.  By filtering each possibility one at a<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;   time it saves time by not having to consider all of the words'''<br />
+    <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;# copy the original lists, so that they will not be altered<br />
+    oldmatrix = matrix.copy()<br />
+    currsevens = sevens.copy()<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;i = 0<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;while len(currsevens) > 0 and i < 7:<br />
+        <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # filter the seven letter words by if the letter in the<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # proper position is within the possibilities for building<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # each of the five letter words<br />
+        <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    currsevens = [word for word in currsevens if word[i] <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        in five_tree[matrix[i]]]<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    i += 1<br />
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;if len(currsevens) != 0:<br />
+        <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # if there are any words that do fit, add it to the current list<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # if the number of sevens now added is 5 then this is a solution,<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   # otherwise recur the subroutine to find if another seven can be<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    # added.<br />
+        <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    for newword in currsevens:<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        for i,char in enumerate(newword):<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            matrix[i] += char<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        if len(matrix[0])==5:<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            solution_list.append(dispstr + "-" + newword)<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        else:<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            newdisp = dispstr + "-" + newword<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            buildWord(matrix, newdisp)<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        matrix = oldmatrix.copy()<br />
+    <br />
+        <br />
+''' Main Program '''<br />
+                <br />
+# Collect the start time (counts in seconds)<br />
+<br />
+start = time.time()<br />
+<br />
+# Initialize the lists<br />
+<br />
+wordlist = []<br />
+fivechar = [[],[],[],[],[]]<br />
+fivebuild = [[],[],[],[],[],[]]<br />
+solution_list = []<br />
+<br />
+# ... and the dictionary<br />
+<br />
+five_tree = {}<br />
+<br />
+print("Initiating Lists...")<br />
+<br />
+# Load the word list<br />
+<br />
+wordfile = open(r"C:\Users\Apeng\OneDrive\Documents\OWLLIST.txt")<br />
+for line in wordfile:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    wordlist.append(line.strip())<br />
+wordfile.close()<br />
+<br />
+# Filter the word list to pull out all 5 letter words<br />
+# where the first 2 letters, the first 3 letters, and<br />
+# the first 4 letters all make valid words.<br />
+<br />
+fives = [word for word in wordlist if (len(word)==5<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              and word[0:2] in wordlist<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              and word[0:3] in wordlist<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;              and word[0:4] in wordlist)]<br />
+print (len(fives))<br />
+currtime = time.time() <br />        
+stopWatch(currtime-start)<br />
+    <br />
+# Make a list of all of the 7 letter words<br />
+    <br />
+sevens = [word for word in wordlist if len(word)==7]<br />
+<br />
+# Make lists of all of the opening strings for each length <br /> 
+# from 1 to 5.  The use of the word "set" is to get unique<br />
+# values.  So the first 4 characters of BORES and BORED <br />
+# would only be represented once in the list<br />
+<br />
+for i in range(1,5):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    fivebuild[i]=list(set([word[0:i] for word in fives]))<br />
+fivebuild[5] = fives<br />
+<br />
+# Build a dictionary where each string points to the letters that can follow<br />
+# in the paths to build the 5 letters words.  The key will be the lead string<br />
+# while the value is a list of the letters that can follow.<br />
+<br />
+for i in range(1,5):<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    for node in fivebuild[i]:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        next_path = [word[-1] for word in fivebuild[i+1] if word[0:i]==node]<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        five_tree[node] = next_path<br />
+<br />
+# Some of the letters that may be in our first words do not start aby words<br />
+# that can be build letter by letter into a 5 letter word (example: 'I').<br />
+# Add in the letters to the dictionary, pointing to a value of an empty list.<br />
+<br />
+all_letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"<br />
+for letter in all_letters:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    if letter not in five_tree.keys():<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        five_tree[letter]=[]<br />
+<br />
+for i, word in enumerate(sevens):<br />
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    # Split all of the characters in the seven letter word into separate<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    # entries in a list, that can then be built off of.<br />
+    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    chars = []<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    for char in word:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        chars.append(char)<br />
+    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    # Every 100 sevens display a message indicating where we are in the program<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    # and how much time has expired<br />
+    <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    if i % 100 == 0:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        print("Considering word {} of {} - {}".format(i+1, len(sevens), word))<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        currtime = time.time()         <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        stopWatch(currtime-start)<br />
+        <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    # Call the main recursive function    <br />
+        <br />
+&nbsp;&nbsp;&nbsp;&nbsp;    buildWord(chars,word)<br />
+<br />
+<br />
+# Get the end time, and display any solutions found, in addition to how<br />
+# much time expired in the running of the program.<br />
+<br />
+end = time.time()<br />
+print("Program Completed!!!")<br />
+print("{} answers found".format(len(solution_list)))<br />
+for solution in solution_list:<br />
+&nbsp;&nbsp;&nbsp;&nbsp;    print(solution)<br />
+stopWatch(end-start)<br /></p>
+				</div>
+			</section>	
+			
+		<!-- CTA -->
+			<section id="cta" class="wrapper style3">
+				<h2>If interested, please view my resume</h2>
+				<ul class="actions">
+					<li><a href="Resume.pdf" class="button big">Get Started</a></li>
+				</ul>
+			</section>
+			
+		<!-- Footer -->
+			<footer id="footer">
+				<span class="copyright">
+					Template Design by <a href="http://www.html5webtemplates.co.uk">Response Web Templates</a>
+                    <p>
+					Content by Allen Pengelly <a href="mailto:apengelly@golden.net">Contact Allen</a>
+				</span>
+			</footer>
+
+	</body>
+</html>
